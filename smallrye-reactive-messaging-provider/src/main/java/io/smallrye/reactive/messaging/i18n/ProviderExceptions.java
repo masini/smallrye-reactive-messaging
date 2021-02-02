@@ -258,4 +258,11 @@ public interface ProviderExceptions {
     @Message(id = 76, value = "Invalid Emitter injection found for  `%s`. The Emitter expected to be parameterized with the emitted type, such as Emitter<String>.")
     DefinitionException invalidRawEmitter(InjectionPoint ip);
 
+    @Message(id = 77, value = "Invalid method annotated with @Incoming: %s - when returning a CompletionStage, you must return a CompletionStage<Void>")
+    DefinitionException definitionCompletionStageOfVoid(String methodAsString);
+
+    @Message(id = 78, value = "Invalid method annotated with @Incoming: %s. The signature is not supported as the produced result would be ignored. "
+            + "The method must return `void`, found %s.")
+    DefinitionException definitionReturnVoid(String methodAsString, String returnType);
+
 }
