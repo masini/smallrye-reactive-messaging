@@ -386,4 +386,8 @@ public class KafkaSink {
         }
     }
 
+    public String getChannel() {
+        return configuration.getChannel();
+    }
+
 }
