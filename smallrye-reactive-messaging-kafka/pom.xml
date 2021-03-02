@@ -73,8 +73,14 @@
     </dependency>
     <dependency>
       <groupId>io.strimzi</groupId>
-      <artifactId>test-container</artifactId>
-      <version>0.20.1</version>
+      <artifactId>strimzi-test-container</artifactId>
+      <version>0.21.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>toxiproxy</artifactId>
+      <version>1.15.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
