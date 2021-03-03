@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.reactive.messaging.health.HealthReport;
@@ -203,7 +205,7 @@ public class CommitStrategiesTest extends WeldTestBase {
 
     }
 
-    @Test
+    @RepeatedTest(10)
     void testThrottledStrategyWithManyRecords() {
         MapBasedConfig config = commonConfiguration()
                 .with("client.id", UUID.randomUUID().toString())
@@ -261,13 +263,16 @@ public class CommitStrategiesTest extends WeldTestBase {
 
         list.forEach(m -> m.ack().toCompletableFuture().join());
 
-        await().untilAsserted(() -> {
-            Map<TopicPartition, OffsetAndMetadata> committed = consumer.committed(offsets.keySet());
-            assertThat(committed.get(p0)).isNotNull();
-            assertThat(committed.get(p0).offset()).isEqualTo(1500);
-            assertThat(committed.get(p1)).isNotNull();
-            assertThat(committed.get(p1).offset()).isEqualTo(1500);
-        });
+        await()
+                .atMost(Duration.ofMinutes(1))
+                .untilAsserted(() -> {
+                    Map<TopicPartition, OffsetAndMetadata> committed = consumer.committed(offsets.keySet());
+                    System.out.println("committed: " + committed.get(p0) + " / " + committed.get(p1));
+                    assertThat(committed.get(p0)).isNotNull();
+                    assertThat(committed.get(p0).offset()).isEqualTo(1500);
+                    assertThat(committed.get(p1)).isNotNull();
+                    assertThat(committed.get(p1).offset()).isEqualTo(1500);
+                });
 
         List<String> payloads = list.stream().map(m -> (String) m.getPayload()).collect(Collectors.toList());
         for (int i = 0; i < 1500; i++) {
